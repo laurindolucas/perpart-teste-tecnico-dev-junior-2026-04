@@ -1,0 +1,14 @@
+# raiz
+node_modules/
+.env
+.DS_Store
+
+# next
+frontend/.next/
+frontend/out/
+
+# nest
+backend/dist/
+
+# docker
+*.log
