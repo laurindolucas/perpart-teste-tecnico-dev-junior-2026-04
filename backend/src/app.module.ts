@@ -7,7 +7,7 @@ import { Product } from './products/product.entity';
 import { Category } from './categories/category.entity';
 import { Favorite } from './favorites/favorite.entity';
 import { AuditLog } from './audit/audit-log.entity';
-
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -25,6 +25,8 @@ import { AuditLog } from './audit/audit-log.entity';
         synchronize: true,
       }),
     }),
+    AuthModule,
   ],
 })
+
 export class AppModule {}
