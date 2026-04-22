@@ -3,6 +3,8 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { AdminSideBar, AdminUserBar, GovBar } from '@uigovpe/components';
 import { useRouter, usePathname } from 'next/navigation';
+import { Toast } from '@uigovpe/components';
+import { useRef } from 'react';
 
 const menuUsuario = [
     {
@@ -49,6 +51,7 @@ const menuAdmin = [
         link: '/relatorios',
     },
 ];
+const toast = useRef(null);
 
 export default function AppLayout({
     children,
@@ -58,6 +61,7 @@ export default function AppLayout({
     const { user, logout, isAdmin } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
+    const toast = useRef(null);
 
     const menuItems = isAdmin ? menuAdmin : menuUsuario;
 
@@ -75,24 +79,27 @@ export default function AppLayout({
     ];
 
     return (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <GovBar />
+
+            <Toast ref={toast} />
 
             <AdminUserBar
                 user={{
-                    name: user?.name || '',
-                    profile: isAdmin ? 'Administrador' : 'Usuário',
+                    name: user?.name ?? '',
+                    profile: isAdmin ? 'admin' : 'user',
                 }}
             />
 
-            <div className="flex">
-                <AdminSideBar
-                    title="Sistema de Gestão"
-                    version="1.0.0"
-                    sections={sections}
-                />
+            <div style={{ display: 'flex', flex: 1 }}>
+                <AdminSideBar sections={sections} />
 
-                <main className="flex-1 p-6">
+                <main style={{
+                    flex: 1,
+                    padding: '1rem',
+                    minWidth: 0,
+                    overflowX: 'auto',
+                }}>
                     {children}
                 </main>
             </div>

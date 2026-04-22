@@ -86,17 +86,18 @@ export default function RelatoriosPage() {
                         onClick={() => { setStartDate(''); setEndDate(''); setPage(1); fetchLogs(); }}
                     />
                 </div>
-
-                <Table value={logs} loading={loading}>
-                    {columns.map((col) => (
-                        <Column
-                            key={col.field}
-                            field={col.field}
-                            header={col.header}
-                            body={col.body}
-                        />
-                    ))}
-                </Table>
+                <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <Table value={logs} loading={loading}>
+                        {columns.map((col) => (
+                            <Column
+                                key={col.field}
+                                field={col.field}
+                                header={col.header}
+                                body={col.body}
+                            />
+                        ))}
+                    </Table> 
+                </div>
 
                 <Paginator
                     first={(page - 1) * limit}

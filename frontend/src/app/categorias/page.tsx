@@ -112,17 +112,18 @@ export default function CategoriasPage() {
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                     style={{ marginBottom: '1rem', width: '100%' }}
                 />
-
-                <Table value={categories} loading={loading}>
-                    {columns.map((col) => (
-                        <Column
-                            key={col.field}
-                            field={col.field}
-                            header={col.header}
-                            body={col.body}
-                        />
-                    ))}
-                </Table>
+                <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <Table value={categories} loading={loading}>
+                        {columns.map((col) => (
+                            <Column
+                                key={col.field}
+                                field={col.field}
+                                header={col.header}
+                                body={col.body}
+                            />
+                        ))}
+                    </Table>
+                </div>
 
                 <Paginator
                     first={(page - 1) * limit}

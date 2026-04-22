@@ -27,8 +27,9 @@ export default function UsuariosPage() {
     const [editing, setEditing] = useState<User | null>(null);
     const [error, setError] = useState('');
     const [form, setForm] = useState({ name: '', email: '', password: '', role: 'user' });
-
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const limit = 10;
+
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -57,19 +58,38 @@ export default function UsuariosPage() {
         setDialogOpen(true);
     };
 
-    const handleSave = async () => {
-        try {
-            if (editing) {
-                await api.put(`/users/${editing.id}`, form);
-            } else {
-                await api.post('/users', form);
-            }
-            setDialogOpen(false);
-            fetchUsers();
-        } catch {
-            setError('Erro ao salvar usuário');
+const handleSave = async () => {
+    try {
+        setLoading(true); 
+        let userId = editing?.id;
+
+        if (editing) {
+            await api.put(`/users/${editing.id}`, form);
+        } else {
+            const response = await api.post('/users', form);
+            userId = response.data.id; 
         }
-    };
+
+        if (avatarFile && userId) {
+            const formData = new FormData();
+            formData.append('file', avatarFile);
+            
+            await api.post(`/users/${userId}/avatar`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+        }
+
+        setDialogOpen(false);
+        fetchUsers();
+        setAvatarFile(null);
+        
+    } catch (err) {
+        console.error(err);
+        setError('Erro ao salvar usuário. Verifique os dados e tente novamente.');
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleDelete = async (id: string) => {
         if (!confirm('Deseja remover este usuário?')) return;
@@ -121,17 +141,19 @@ export default function UsuariosPage() {
                     }}
                     style={{ marginBottom: '1rem', width: '100%' }}
                 />
+                <div style={{ overflowX: 'auto', width: '100%' }}>
 
-                <Table value={users} loading={loading}>
-                    {columns.map((col) => (
-                        <Column
-                            key={col.field}
-                            field={col.field}
-                            header={col.header}
-                            body={col.body}
-                        />
-                    ))}
-                </Table>
+                    <Table value={users} loading={loading}>
+                        {columns.map((col) => (
+                            <Column
+                                key={col.field}
+                                field={col.field}
+                                header={col.header}
+                                body={col.body}
+                            />
+                        ))}
+                    </Table>
+                </div>
                 <Paginator
                     first={(page - 1) * limit}
                     rows={limit}
@@ -163,6 +185,16 @@ export default function UsuariosPage() {
                             onChange={(e) => setForm({ ...form, password: e.target.value })}
                             type="password"
                         />
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+                                Foto do Usuário
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+                            />
+                        </div>
                         <Dropdown
                             label="Perfil"
                             value={form.role}

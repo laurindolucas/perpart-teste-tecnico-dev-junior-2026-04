@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import {
     Table, Button, Typography, Search,
-    Dialog, InputText, MultiSelect, Message, Paginator, InputNumber,Column
+    Dialog, InputText, MultiSelect, Message, Paginator, InputNumber, Column,
+    Dropdown
 } from '@uigovpe/components';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import AppLayout from '@/components/AppLayout';
@@ -38,13 +39,21 @@ export default function ProdutosPage() {
     const [form, setForm] = useState({
         name: '', description: '', price: 0, categoryIds: [] as string[],
     });
+    const [categoryFilter, setCategoryFilter] = useState('');
 
     const limit = 10;
 
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const { data } = await api.get('/products', { params: { page, limit, search } });
+            const { data } = await api.get('/products', {
+                params: {
+                    page,
+                    limit,
+                    search,
+                    categoryId: categoryFilter || undefined
+                }
+            });
             setProducts(data.data);
             setTotal(data.total);
         } catch {
@@ -55,9 +64,14 @@ export default function ProdutosPage() {
     };
 
     const fetchCategories = async () => {
-        const { data } = await api.get('/categories?limit=100');
-        setCategories(data.data);
+        try {
+            const { data } = await api.get('/categories');
+            setCategories(data);
+        } catch {
+            setError('Erro ao carregar categorias');
+        }
     };
+
 
     useEffect(() => {
         fetchProducts();
@@ -163,17 +177,26 @@ export default function ProdutosPage() {
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                     style={{ marginBottom: '1rem', width: '100%' }}
                 />
+                <Dropdown
+                    label="Filtrar por Categoria"
+                    value={categoryFilter}
+                    options={[{ label: 'Todas', value: '' }, ...categoryOptions]}
+                    onChange={(e) => { setCategoryFilter(e.value); setPage(1); }}
+                    style={{ marginBottom: '1rem', minWidth: '200px' }}
+                />
+                <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <Table value={products} loading={loading}>
+                        {columns.map((col) => (
+                            <Column
+                                key={col.field}
+                                field={col.field}
+                                header={col.header}
+                                body={col.body}
+                            />
+                        ))}
+                    </Table>
+                </div>
 
-                <Table value={products} loading={loading}>
-                    {columns.map((col) => (
-                        <Column
-                            key={col.field}
-                            field={col.field}
-                            header={col.header}
-                            body={col.body}
-                        />
-                    ))}
-                </Table>
 
                 <Paginator
                     first={(page - 1) * limit}
